@@ -7,10 +7,10 @@ var particle = new Particle();
 
 var mysql = require('mysql');
 var con = mysql.createConnection({
-  host: "localhost",
-  user: "user",
-  password: "pass",
-  database: "test"
+  host: process.env.DBHOST,
+  user: process.env.DBUSER,
+  password: process.env.DBPASSWORD,
+  database: process.env.DBDATABASE
 });
 
 con.connect(function(err) {
