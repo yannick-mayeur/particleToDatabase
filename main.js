@@ -22,11 +22,23 @@ con.connect(function(err) {
 particle.login({ username : process.env.PARTICLE_LOGIN, password : process.env.PARTICLE_PASSWORD }).then(function(data) {
   particle.getEventStream({ deviceId: 'mine', auth: data.body.access_token }).then(function(stream) {
     stream.on('event', function(e) {
-      var sql = "INSERT INTO event (name, data, published_at) VALUES (?, ?, ?)";
+      var core_id = e.coreid;
+      var sql  ='SELECT * FROM device WHERE core_id = ?';
+      con.query(sql, [core_id], function (err, result) {
+        if (err) throw err;
+        console.log(result.length)
+        if (result.length <= 0) {
+          sql = "INSERT INTO device (core_id) VALUES (?)";
+          con.query(sql, [core_id], function (err, result) {
+            if (err) throw err;
+            console.log("1 record inserted into device");
+          });
+        }
+      });
+
+      sql = "INSERT INTO event (name, data, published_at) VALUES (?, ?, ?)";
       var sub = e.published_at.substring(0,18);
-      console.log("hoho");
       var value = [e.name, e.data, sub];
-      console.log("haha");
       con.query(sql, value, function (err, result) {
         if (err) throw err;
         console.log("1 record inserted");
