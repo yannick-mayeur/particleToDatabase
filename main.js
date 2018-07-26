@@ -41,7 +41,7 @@ particle.login({ username : process.env.PARTICLE_LOGIN, password : process.env.P
       var value = [e.name, e.data, sub];
       con.query(sql, value, function (err, result) {
         if (err) throw err;
-        console.log("1 record inserted");
+        console.log("1 record inserted into event");
       });
       console.log("Event: " + e.name);
     });
