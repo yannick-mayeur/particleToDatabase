@@ -26,7 +26,6 @@ particle.login({ username : process.env.PARTICLE_LOGIN, password : process.env.P
       var sql  ='SELECT * FROM device WHERE core_id = ?';
       con.query(sql, [core_id], function (err, result) {
         if (err) throw err;
-        console.log(result.length)
         if (result.length <= 0) {
           sql = "INSERT INTO device (core_id) VALUES (?)";
           con.query(sql, [core_id], function (err, result) {
@@ -36,14 +35,20 @@ particle.login({ username : process.env.PARTICLE_LOGIN, password : process.env.P
         }
       });
 
-      sql = "INSERT INTO event (name, data, published_at) VALUES (?, ?, ?)";
+      var device_id;
+      sql  = 'SELECT core_id FROM device WHERE core_id = ?';
+      con.query(sql, [core_id], function (err, result) {
+        if (err) throw err;
+        device_id = result[0].id;
+      });
+
+      sql = "INSERT INTO event (name, data, published_at) VALUES (?, ?, ?, ?)";
       var sub = e.published_at.substring(0,18);
-      var value = [e.name, e.data, sub];
+      var value = [e.name, e.data, sub, device_id];
       con.query(sql, value, function (err, result) {
         if (err) throw err;
         console.log("1 record inserted into event");
       });
-      console.log("Event: " + e.name);
     });
   });
 });
