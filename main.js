@@ -23,6 +23,7 @@ particle.login({ username : process.env.PARTICLE_LOGIN, password : process.env.P
   particle.getEventStream({ deviceId: 'mine', auth: data.body.access_token }).then(function(stream) {
     stream.on('event', function(e) {
       var core_id = e.coreid;
+      var device_id;
       var sql  ='SELECT * FROM device WHERE core_id = ?';
       con.query(sql, [core_id], function (err, result) {
         if (err) throw err;
@@ -30,25 +31,28 @@ particle.login({ username : process.env.PARTICLE_LOGIN, password : process.env.P
           sql = "INSERT INTO device (core_id) VALUES (?)";
           con.query(sql, [core_id], function (err, result) {
             if (err) throw err;
-            console.log("1 record inserted into device");
+            console.log("1 record inserted into device with id: ",
+              result.insertId);
+            device_id = result.insertId;
+            sql = "INSERT INTO event (name, data, published_at, device_id) VALUES (?, ?, ?, ?)";
+            var sub = e.published_at.substring(0,18);
+            var value = [e.name, e.data, sub, device_id];
+            con.query(sql, value, function (err, result) {
+              if (err) throw err;
+              console.log("1 record inserted into event");
+            });
+          });
+        } else {
+          device_id = result[0].id;
+          console.log(device_id);
+          sql = "INSERT INTO event (name, data, published_at, device_id) VALUES (?, ?, ?, ?)";
+          var sub = e.published_at.substring(0,18);
+          var value = [e.name, e.data, sub, device_id];
+          con.query(sql, value, function (err, result) {
+            if (err) throw err;
+            console.log("1 record inserted into event");
           });
         }
-      });
-
-      var device_id;
-      sql  = 'SELECT id FROM device WHERE core_id = ?';
-      con.query(sql, [core_id], function (err, result) {
-        if (err) throw err;
-        console.log("id of particle device to insert for event: ", result);
-        device_id = result[0].id;
-      });
-
-      sql = "INSERT INTO event (name, data, published_at, device_id) VALUES (?, ?, ?, ?)";
-      var sub = e.published_at.substring(0,18);
-      var value = [e.name, e.data, sub, device_id];
-      con.query(sql, value, function (err, result) {
-        if (err) throw err;
-        console.log("1 record inserted into event");
       });
     });
   });
