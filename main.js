@@ -42,7 +42,7 @@ particle.login({ username : process.env.PARTICLE_LOGIN, password : process.env.P
         device_id = result[0].id;
       });
 
-      sql = "INSERT INTO event (name, data, published_at) VALUES (?, ?, ?, ?)";
+      sql = "INSERT INTO event (name, data, published_at, device_id) VALUES (?, ?, ?, ?)";
       var sub = e.published_at.substring(0,18);
       var value = [e.name, e.data, sub, device_id];
       con.query(sql, value, function (err, result) {
