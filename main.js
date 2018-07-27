@@ -39,7 +39,9 @@ particle.login({ username : process.env.PARTICLE_LOGIN, password : process.env.P
       sql  = 'SELECT core_id FROM device WHERE core_id = ?';
       con.query(sql, [core_id], function (err, result) {
         if (err) throw err;
-        device_id = result[0].core_id;
+        // for test
+        console.log(result);
+        // device_id = result[0].core_id;
       });
 
       sql = "INSERT INTO event (name, data, published_at, device_id) VALUES (?, ?, ?, ?)";
